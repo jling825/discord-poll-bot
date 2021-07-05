@@ -1,8 +1,18 @@
+import os
 import config
 import discord
 
+# get Discord token
+try:
+    bot_token = config.bot_token # from local config.py
+    print("Getting token from congif.py")
+except:
+    bot_token = os.environ['bot_token'] # from repl.it secret
+    print("Getting token from repl.it secret")
+
 client = discord.Client()
 
+# testing embeds
 '''
 @client.command()
 async def embed(ctx, poll_title):
@@ -26,4 +36,4 @@ async def on_message(message):
             await message.channel.send('Accepting voting options for ' + split_msg[1])
         
 
-client.run(config.discord_token)
+client.run(bot_token)
