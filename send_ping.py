@@ -6,7 +6,7 @@ app = Flask('')
 
 @app.route('/')
 def home():
-    return "Hello. I am alive!"
+    return "Poll Bot#8440 is online."
 
 
 def run():
