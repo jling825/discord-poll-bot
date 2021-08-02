@@ -1,8 +1,10 @@
 # general responses
-commands = ["!host", "!newpoll", "!polltitle", "!polldesc", "!pollurl", "!polladd", "!polldrop", "!tally"]
+commands = ["!status", "!whitelist", "!blacklist", "!newpoll", "!polltitle", "!polldesc", "!pollurl", "!polladd", "!polldrop", "!tally"]
 
 help = (
-"`!host` - Checks if bot is running locally and/or online\n" +
+"`!status` - Prints bot's local/online statuses\n" +
+"`!whitelist` - Add channel to Poll Bot whitelist\n" +
+"`!blacklist` - Remove channel from Poll Bot whitelist\n" +
 "`!newpoll` - Starts a new poll\n" +
 "`!polltitle` - Assigns poll title\n" +
 "`!polldesc` - Assigns poll description\n" +
@@ -11,3 +13,5 @@ help = (
 "`!polldrop` - Removes voting option from poll\n" +
 "`!tally` - Start tally"
 )
+
+whitelist = []

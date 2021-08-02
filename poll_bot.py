@@ -23,14 +23,16 @@ poll = discord.Embed()
 poll_options = []
 embed_message = ""
 options_message = ""
+running_locally = False
+running_online = False
 
 # get Discord token
 try:
     bot_token = config.bot_token  # from local config.py
-    execution_location = 'locally.'
+    running_locally = True
 except:
     bot_token = os.environ['bot_token']  # from repl.it secret
-    execution_location = 'online.'
+    running_online = True
     send_ping.ping()
 
 @client.event
@@ -39,15 +41,30 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
+
     # general responses
     if message.author == client.user:
         return
 
-    elif not message.content.startswith(tuple(messages.commands)) or message.content == 'pbhelp':
+    # Poll Bot configuration
+    elif message.content == '!whitelist':
+        if not message.channel.id in messages.whitelist:
+            messages.whitelist.append(message.channel.id)
+        await message.channel.send("Channel whitelisted.")
+
+    elif not message.channel.id in messages.whitelist:
+        return
+
+    elif message.content == '!blacklist':
+        messages.whitelist.remove(message.channel.id)
+        await message.channel.send("Channel blacklisted.")
+
+    elif not message.content.startswith(tuple(messages.commands)):
         await message.channel.send(messages.help)
 
-    elif message.content == '!host':
-        await message.channel.send("Host instance detected " + execution_location)
+    elif message.content == '!status':
+        await message.channel.send("Local instance detected: {0}".format(running_locally))
+        await message.channel.send("Online instance detected: {0}".format(running_online))
 
     # poll embed setup
     elif message.content == '!newpoll':
@@ -100,7 +117,7 @@ async def on_message(message):
             pass
         await options_message.edit(content="Options: {0}".format(poll_options))
 
-    # tally
+    # start tally
     elif message.content == '!tally':
         await options_message.delete()
         poll.color = 0x0cb7e5
