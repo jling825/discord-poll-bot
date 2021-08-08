@@ -1,36 +1,25 @@
 # discord-poll-bot
 
-## Flowchart
-```mermaid
-graph TD;
-    subgraph Poll Bot Configuration
-    Start([Start]) --> process1(Message sent);
-    process1 --> data1[/Read message author/];
-    data1 --> decision1{Author is client};
-    decision1 -- yes --> process2(Ignore message);
-    process2 --> End([End]);
-    decision1 -- no --> data2[/Read message content/];
-    data2 --> decision2{Content is `!whitelist`}
-    decision2 -- yes --> process3(Add channel to messages.whitelist)
-    process3 --> End
-    decision2 -- no --> data3[/Read message channel/]
-    data3 --> decision3{Channel is on messages.whitelist}
-    decision3 -- no --> process2
-    decision3 -- yes --> decision4{Content is `!blacklist`}
-    decision4 -- yes --> process4(Remove channel from messages.whitelist)
-    process4 --> End
-    decision4 -- no --> decision5{Content is `!status`}
-    decision5 -- yes --> process5(Print Poll Bot status)
-    process5 --> End
-    decision5 -- no --> decision6{Content in messages.commands}
-    decision6 -- no --> process6(Print messages.help)
-    process6 --> End
-    end
+## Projects
+- [ ] General
+    - [ ] Partition poll_bot.py into separate files
+    - [ ] 
+- [x] Configure bot
+    - [x] Whitelist bot to specific channel(s)
+    - [x] Check if bot is run locally and/or online
+- [ ] Setup poll
+    - [x] Start new poll
+    - [x] Set poll title
+    - [x] Set poll description
+    - [x] Set poll url
+    - [ ] Set poll thumbnail
+    - [x] Set poll add option
+    - [x] Set poll drop option
+- [x] Start tally
+- [ ] Start strawpoll
+- [ ] Start alternative vote
+- [ ] Start single transferrable vote
 
-    subgraph Poll Setup
-    decision6 -- yes --> process7(Poll Setup command sent)
-    process7 --> decision7{Content is `!newpoll`}
-    decision7 -- yes --> process8(Create new poll)
-    process8 --> End
-    end
-```
+## Flowchart
+Bot configuration flowchart deployed by [Mermaid Live Editor](https://mermaid-js.github.io/mermaid-live-editor/edit#eyJjb2RlIjoiZ3JhcGggVEQ7XG4gICAgc3ViZ3JhcGggUG9sbCBCb3QgQ29uZmlndXJhdGlvblxuICAgIFN0YXJ0KFtTdGFydF0pIC0tPiBwcm9jZXNzMShNZXNzYWdlIHNlbnQpO1xuICAgIHByb2Nlc3MxIC0tPiBkYXRhMVsvUmVhZCBtZXNzYWdlIGF1dGhvci9dO1xuICAgIGRhdGExIC0tPiBkZWNpc2lvbjF7QXV0aG9yIGlzIGNsaWVudH07XG4gICAgZGVjaXNpb24xIC0tIHllcyAtLT4gcHJvY2VzczIoSWdub3JlIG1lc3NhZ2UpO1xuICAgIHByb2Nlc3MyIC0tPiBFbmQoW0VuZF0pO1xuICAgIGRlY2lzaW9uMSAtLSBubyAtLT4gZGF0YTJbL1JlYWQgbWVzc2FnZSBjb250ZW50L107XG4gICAgZGF0YTIgLS0-IGRlY2lzaW9uMntDb250ZW50IGlzIGAhd2hpdGVsaXN0YH1cbiAgICBkZWNpc2lvbjIgLS0geWVzIC0tPiBwcm9jZXNzMyhBZGQgY2hhbm5lbCB0byBtZXNzYWdlcy53aGl0ZWxpc3QpXG4gICAgcHJvY2VzczMgLS0-IEVuZFxuICAgIGRlY2lzaW9uMiAtLSBubyAtLT4gZGF0YTNbL1JlYWQgbWVzc2FnZSBjaGFubmVsL11cbiAgICBkYXRhMyAtLT4gZGVjaXNpb24ze0NoYW5uZWwgaXMgb24gbWVzc2FnZXMud2hpdGVsaXN0fVxuICAgIGRlY2lzaW9uMyAtLSBubyAtLT4gcHJvY2VzczJcbiAgICBkZWNpc2lvbjMgLS0geWVzIC0tPiBkZWNpc2lvbjR7Q29udGVudCBpcyBgIWJsYWNrbGlzdGB9XG4gICAgZGVjaXNpb240IC0tIHllcyAtLT4gcHJvY2VzczQoUmVtb3ZlIGNoYW5uZWwgZnJvbSBtZXNzYWdlcy53aGl0ZWxpc3QpXG4gICAgcHJvY2VzczQgLS0-IEVuZFxuICAgIGRlY2lzaW9uNCAtLSBubyAtLT4gZGVjaXNpb241e0NvbnRlbnQgaXMgYCFzdGF0dXNgfVxuICAgIGRlY2lzaW9uNSAtLSB5ZXMgLS0-IHByb2Nlc3M1KFByaW50IFBvbGwgQm90IHN0YXR1cylcbiAgICBwcm9jZXNzNSAtLT4gRW5kXG4gICAgZGVjaXNpb241IC0tIG5vIC0tPiBkZWNpc2lvbjZ7Q29udGVudCBpbiBtZXNzYWdlcy5jb21tYW5kc31cbiAgICBkZWNpc2lvbjYgLS0gbm8gLS0-IHByb2Nlc3M2KFByaW50IG1lc3NhZ2VzLmhlbHApXG4gICAgcHJvY2VzczYgLS0-IEVuZFxuICAgIGVuZFxuXG4gICAgc3ViZ3JhcGggUG9sbCBTZXR1cFxuICAgIGRlY2lzaW9uNiAtLSB5ZXMgLS0-IHByb2Nlc3M3KFBvbGwgU2V0dXAgY29tbWFuZCBzZW50KVxuICAgIHByb2Nlc3M3IC0tPiBkZWNpc2lvbjd7Q29udGVudCBpcyBgIW5ld3BvbGxgfVxuICAgIGRlY2lzaW9uNyAtLSB5ZXMgLS0-IHByb2Nlc3M4KENyZWF0ZSBuZXcgcG9sbClcbiAgICBwcm9jZXNzOCAtLT4gRW5kXG4gICAgZW5kIiwibWVybWFpZCI6IntcbiAgXCJ0aGVtZVwiOiBcImRlZmF1bHRcIlxufSIsInVwZGF0ZUVkaXRvciI6ZmFsc2UsImF1dG9TeW5jIjp0cnVlLCJ1cGRhdGVEaWFncmFtIjpmYWxzZX0)
+![flowchart!](https://mermaid.ink/img/eyJjb2RlIjoiZ3JhcGggVEQ7XG4gICAgc3ViZ3JhcGggQm90IENvbmZpZ3VyYXRpb25cbiAgICBTdGFydChbU3RhcnRdKSAtLT4gcHJvY2VzczEoTWVzc2FnZSBzZW50KTtcbiAgICBwcm9jZXNzMSAtLT4gZGF0YTFbL1JlYWQgbWVzc2FnZSBhdXRob3IvXTtcbiAgICBkYXRhMSAtLT4gZGVjaXNpb24xe0F1dGhvciBpcyBjbGllbnR9O1xuICAgIGRlY2lzaW9uMSAtLSB5ZXMgLS0-IHByb2Nlc3MyKElnbm9yZSBtZXNzYWdlKTtcbiAgICBwcm9jZXNzMiAtLT4gRW5kKFtFbmRdKTtcbiAgICBkZWNpc2lvbjEgLS0gbm8gLS0-IGRhdGEyWy9SZWFkIG1lc3NhZ2UgY29udGVudC9dO1xuICAgIGRhdGEyIC0tPiBkZWNpc2lvbjJ7Q29udGVudCBpcyBgIXdoaXRlbGlzdGB9XG4gICAgZGVjaXNpb24yIC0tIHllcyAtLT4gcHJvY2VzczMoQWRkIGNoYW5uZWwgdG8gbWVzc2FnZXMud2hpdGVsaXN0KVxuICAgIHByb2Nlc3MzIC0tPiBFbmRcbiAgICBkZWNpc2lvbjIgLS0gbm8gLS0-IGRhdGEzWy9SZWFkIG1lc3NhZ2UgY2hhbm5lbC9dXG4gICAgZGF0YTMgLS0-IGRlY2lzaW9uM3tDaGFubmVsIGlzIG9uIG1lc3NhZ2VzLndoaXRlbGlzdH1cbiAgICBkZWNpc2lvbjMgLS0gbm8gLS0-IHByb2Nlc3MyXG4gICAgZGVjaXNpb24zIC0tIHllcyAtLT4gZGVjaXNpb240e0NvbnRlbnQgaXMgYCFibGFja2xpc3RgfVxuICAgIGRlY2lzaW9uNCAtLSB5ZXMgLS0-IHByb2Nlc3M0KFJlbW92ZSBjaGFubmVsIGZyb20gbWVzc2FnZXMud2hpdGVsaXN0KVxuICAgIHByb2Nlc3M0IC0tPiBFbmRcbiAgICBkZWNpc2lvbjQgLS0gbm8gLS0-IGRlY2lzaW9uNXtDb250ZW50IGlzIGAhc3RhdHVzYH1cbiAgICBkZWNpc2lvbjUgLS0geWVzIC0tPiBwcm9jZXNzNShQcmludCBQb2xsIEJvdCBzdGF0dXMpXG4gICAgcHJvY2VzczUgLS0-IEVuZFxuICAgIGRlY2lzaW9uNSAtLSBubyAtLT4gZGVjaXNpb242e0NvbnRlbnQgaW4gbWVzc2FnZXMuY29tbWFuZHN9XG4gICAgZGVjaXNpb242IC0tIG5vIC0tPiBwcm9jZXNzNihQcmludCBtZXNzYWdlcy5oZWxwKVxuICAgIHByb2Nlc3M2IC0tPiBFbmRcbiAgICBlbmRcblxuICAgIHN1YmdyYXBoIFBvbGwgU2V0dXBcbiAgICBkZWNpc2lvbjYgLS0geWVzIC0tPiBwcm9jZXNzNyhQb2xsIFNldHVwIGNvbW1hbmQgc2VudClcbiAgICBwcm9jZXNzNyAtLT4gZGVjaXNpb243e0NvbnRlbnQgaXMgYCFuZXdwb2xsYH1cbiAgICBkZWNpc2lvbjcgLS0geWVzIC0tPiBwcm9jZXNzOChDcmVhdGUgbmV3IHBvbGwpXG4gICAgcHJvY2VzczggLS0-IEVuZFxuICAgIGVuZCIsIm1lcm1haWQiOnsidGhlbWUiOiJkZWZhdWx0In0sInVwZGF0ZUVkaXRvciI6ZmFsc2UsImF1dG9TeW5jIjp0cnVlLCJ1cGRhdGVEaWFncmFtIjpmYWxzZX0)
