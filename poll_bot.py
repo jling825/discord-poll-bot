@@ -1,5 +1,8 @@
-#TODO: restrict bot to one channel
-#TODO: impliment "!tally" command
+#TODO: add option to close poll manually
+#TODO: add option to close poll with time limit
+#TODO: start where bot left off in last session
+#TODO: add embed thumbnail option
+#TODO: only display one pass/fail message
 #TODO: impliment "!strawpoll" command
 #TODO: impliment "!alternativevote" command
 #TODO: impliment "!singletransferrablevote" command
@@ -18,14 +21,6 @@ intents.members= True
 
 client = discord.Client(intents=intents)
 
-# set data
-poll = discord.Embed()
-poll_options = []
-embed_message = ""
-options_message = ""
-running_locally = False
-running_online = False
-
 # get Discord token
 try:
     bot_token = config.bot_token  # from local config.py
@@ -35,6 +30,14 @@ except:
     running_online = True
     send_ping.ping()
 
+# set data
+poll = discord.Embed()
+poll_options = []
+embed_message = ""
+options_message = ""
+running_locally = False
+running_online = False
+
 @client.event
 async def on_ready():
     print("We have logged in as {0.user}".format(client))
@@ -42,11 +45,10 @@ async def on_ready():
 @client.event
 async def on_message(message):
 
-    # general responses
     if message.author == client.user:
         return
 
-    # Poll Bot configuration
+    # Configure bot
     elif message.content == '!whitelist':
         if not message.channel.id in messages.whitelist:
             messages.whitelist.append(message.channel.id)
@@ -81,16 +83,21 @@ async def on_message(message):
     elif message.content.startswith('!polltitle'):
         try:
             poll.title = message.content.split(' ', 1)[1]
+            await embed_message.edit(embed=poll)
         except IndexError:
-            await message.channel.send("Poll title cannot be empty")
-        await embed_message.edit(embed=poll)
+            await message.channel.send("Last Error: Poll title cannot be empty.")
+        except AttributeError:
+            await message.channel.send("Last Error: Cannot change title. No poll to edit.")
     
     elif message.content.startswith('!polldesc'):
         try:
             poll.description = message.content.split(' ', 1)[1]
+            await embed_message.edit(embed=poll)
         except IndexError:
             poll.description = ""
-        await embed_message.edit(embed=poll)
+        except AttributeError:
+            await message.channel.send("Last Error: Cannot change description. No poll to edit.")
+        
 
     elif message.content.startswith('!pollurl'):
         try:
@@ -98,24 +105,32 @@ async def on_message(message):
                 poll.url = message.content.split(' ', 1)[1]
             else:
                 poll.url = "https://" + message.content.split(' ', 1)[1]
+            await embed_message.edit(embed=poll)
         except IndexError:
             poll.url = ""
-        await embed_message.edit(embed=poll)
+        except AttributeError:
+            await message.channel.send("Last Error: Cannot change url. No poll to edit.")
 
     # poll options setup
     elif message.content.startswith('!polladd'):
         try:
             poll_options.append(message.content.split(' ', 1)[1])
+            await options_message.edit(content="Options: {0}".format(poll_options))
         except IndexError:
-            pass
-        await options_message.edit(content="Options: {0}".format(poll_options))
+            await message.channel.send("Last Error: Poll option cannot be empty.")
+        except AttributeError:
+            await message.channel.send("Last Error: Cannot add poll option. No poll to edit.")
 
     elif message.content.startswith('!polldrop'):
         try:
             poll_options.remove(message.content.split(' ', 1)[1])
+            await options_message.edit(content="Options: {0}".format(poll_options))
         except IndexError:
+            await message.channel.send("Last Error: Poll option cannot be empty.")
+        except ValueError:
             pass
-        await options_message.edit(content="Options: {0}".format(poll_options))
+        except AttributeError:
+            await message.channel.send("Last Error: Cannot remove poll option. No poll to edit.")
 
     # start tally
     elif message.content == '!tally':
