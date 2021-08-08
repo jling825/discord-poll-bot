@@ -1,8 +1,8 @@
 #TODO: add option to close poll manually
 #TODO: add option to close poll with time limit
-#TODO: start where bot left off in last session
+#TODO: track all active polls
 #TODO: add embed thumbnail option
-#TODO: only display one pass/fail message
+#TODO: display one pass/fail message
 #TODO: impliment "!strawpoll" command
 #TODO: impliment "!alternativevote" command
 #TODO: impliment "!singletransferrablevote" command
@@ -21,6 +21,15 @@ intents.members= True
 
 client = discord.Client(intents=intents)
 
+# set data
+poll = discord.Embed()
+poll_options = []
+embed_message = ""
+options_message = ""
+status_message = ""
+running_locally = False
+running_online = False
+
 # get Discord token
 try:
     bot_token = config.bot_token  # from local config.py
@@ -29,14 +38,6 @@ except:
     bot_token = os.environ['bot_token']  # from repl.it secret
     running_online = True
     send_ping.ping()
-
-# set data
-poll = discord.Embed()
-poll_options = []
-embed_message = ""
-options_message = ""
-running_locally = False
-running_online = False
 
 @client.event
 async def on_ready():
@@ -52,21 +53,23 @@ async def on_message(message):
     elif message.content == '!whitelist':
         if not message.channel.id in messages.whitelist:
             messages.whitelist.append(message.channel.id)
-        await message.channel.send("Channel whitelisted.")
+            global status_message
+        await message.channel.send(messages.help)
+        status_message = await message.channel.send(content="[PASS] Channel whitelisted.")
 
     elif not message.channel.id in messages.whitelist:
         return
 
     elif message.content == '!blacklist':
         messages.whitelist.remove(message.channel.id)
-        await message.channel.send("Channel blacklisted.")
+        await status_message.edit(content="[PASS] Channel blacklisted.")
 
     elif not message.content.startswith(tuple(messages.commands)):
-        await message.channel.send(messages.help)
+        await status_message.edit(content="[FAIL] Unrecognized command: \"{0}\"".format(message.content))
+        #await message.channel.send(messages.help)
 
     elif message.content == '!status':
-        await message.channel.send("Local instance detected: {0}".format(running_locally))
-        await message.channel.send("Online instance detected: {0}".format(running_online))
+        await status_message.edit(content="[PASS] Local instance detected: {0} | Online instance detected: {1}".format(running_locally, running_online))
 
     # poll embed setup
     elif message.content == '!newpoll':
@@ -79,24 +82,32 @@ async def on_message(message):
         global options_message
         embed_message = await message.channel.send(embed=poll)
         options_message = await message.channel.send("Options:")
+        status_message = await message.channel.send(content="[PASS] New poll started.")
 
     elif message.content.startswith('!polltitle'):
         try:
             poll.title = message.content.split(' ', 1)[1]
             await embed_message.edit(embed=poll)
+            await status_message.edit(content="[PASS] Poll title updated.")
         except IndexError:
-            await message.channel.send("Last Error: Poll title cannot be empty.")
+            await status_message.edit(content="[FAIL] Poll title cannot be empty.")
         except AttributeError:
-            await message.channel.send("Last Error: Cannot change title. No poll to edit.")
+            await status_message.edit(content="[FAIL] Cannot update title. No poll to edit.")
     
     elif message.content.startswith('!polldesc'):
         try:
             poll.description = message.content.split(' ', 1)[1]
             await embed_message.edit(embed=poll)
+            await status_message.edit(content="[PASS] Poll description updated.")
         except IndexError:
-            poll.description = ""
+            try:
+                poll.description = ""
+                await embed_message.edit(embed=poll)
+                await status_message.edit(content="[PASS] Poll description removed.")
+            except AttributeError:
+                await status_message.edit(content="[FAIL] Cannot update description. No poll to edit.")
         except AttributeError:
-            await message.channel.send("Last Error: Cannot change description. No poll to edit.")
+            await status_message.edit(content="[FAIL] Cannot update description. No poll to edit.")
         
 
     elif message.content.startswith('!pollurl'):
@@ -106,43 +117,55 @@ async def on_message(message):
             else:
                 poll.url = "https://" + message.content.split(' ', 1)[1]
             await embed_message.edit(embed=poll)
+            await status_message.edit(content="[PASS] Poll url updated.")
         except IndexError:
-            poll.url = ""
+            try:
+                poll.url = ""
+                await embed_message.edit(embed=poll)
+                await status_message.edit(content="[PASS] Poll url removed.")
+            except AttributeError:
+                await status_message.edit(content="[FAIL] Cannot update url. No poll to edit.")
         except AttributeError:
-            await message.channel.send("Last Error: Cannot change url. No poll to edit.")
+            await status_message.edit(content="[FAIL] Cannot update url. No poll to edit.")
 
     # poll options setup
     elif message.content.startswith('!polladd'):
         try:
             poll_options.append(message.content.split(' ', 1)[1])
             await options_message.edit(content="Options: {0}".format(poll_options))
+            await status_message.edit(content="[PASS] Poll option added.")
         except IndexError:
-            await message.channel.send("Last Error: Poll option cannot be empty.")
+            await status_message.edit(content="[FAIL] Poll option cannot be empty.")
         except AttributeError:
-            await message.channel.send("Last Error: Cannot add poll option. No poll to edit.")
+            await status_message.edit(content="[FAIL] Cannot add poll option. No poll to edit.")
 
     elif message.content.startswith('!polldrop'):
         try:
             poll_options.remove(message.content.split(' ', 1)[1])
             await options_message.edit(content="Options: {0}".format(poll_options))
+            await status_message.edit(content="[PASS] Poll option removed.")
         except IndexError:
-            await message.channel.send("Last Error: Poll option cannot be empty.")
+            await status_message.edit(content="[FAIL] Poll option cannot be empty.")
         except ValueError:
-            pass
+            await status_message.edit(content="[FAIL] Cannot remove poll option. Option does not exist.")
         except AttributeError:
-            await message.channel.send("Last Error: Cannot remove poll option. No poll to edit.")
+            await status_message.edit(content="[FAIL] Cannot remove poll option. No poll to edit.")
 
     # start tally
     elif message.content == '!tally':
-        await options_message.delete()
-        poll.color = 0x0cb7e5
-        poll.add_field(name='✅',value="Voted Yes:")
-        poll.add_field(name='❔',value="Voted Maybe:")
-        poll.add_field(name='❌',value="Voted No:")
-        await embed_message.edit(embed=poll)
-        await embed_message.add_reaction('✅')
-        await embed_message.add_reaction('❔')
-        await embed_message.add_reaction('❌')
+        try:
+            await options_message.delete()
+            poll.color = 0x0cb7e5
+            poll.add_field(name='✅',value="Voted Yes:")
+            poll.add_field(name='❔',value="Voted Maybe:")
+            poll.add_field(name='❌',value="Voted No:")
+            await embed_message.edit(embed=poll)
+            await embed_message.add_reaction('✅')
+            await embed_message.add_reaction('❔')
+            await embed_message.add_reaction('❌')
+            await status_message.edit(content="[PASS] New tally started.")
+        except AttributeError:
+            await status_message.edit(content="[FAIL] Cannot start tally.  No poll available.")
 
     if message.author != client.user:
         await message.delete()
